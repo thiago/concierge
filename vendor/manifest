@@ -1,0 +1,120 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/chzyer/readline",
+			"repository": "https://github.com/chzyer/readline",
+			"vcs": "git",
+			"revision": "25c2772d5fd908077927228597b084a1f1a0e66d",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/julienschmidt/httprouter",
+			"repository": "https://github.com/julienschmidt/httprouter",
+			"vcs": "git",
+			"revision": "4563b0ba73e4db6c6423b60a26f3cadd2e9a1ec9",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/klauspost/compress/flate",
+			"repository": "https://github.com/klauspost/compress",
+			"vcs": "git",
+			"revision": "8df558b6cb6f9b445f9586446cfe7223e7d8bd6b",
+			"branch": "master",
+			"path": "flate",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/klauspost/compress/gzip",
+			"repository": "https://github.com/klauspost/compress",
+			"vcs": "git",
+			"revision": "8df558b6cb6f9b445f9586446cfe7223e7d8bd6b",
+			"branch": "master",
+			"path": "/gzip",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/klauspost/compress/zlib",
+			"repository": "https://github.com/klauspost/compress",
+			"vcs": "git",
+			"revision": "8df558b6cb6f9b445f9586446cfe7223e7d8bd6b",
+			"branch": "master",
+			"path": "zlib",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/klauspost/cpuid",
+			"repository": "https://github.com/klauspost/cpuid",
+			"vcs": "git",
+			"revision": "09cded8978dc9e80714c4d85b0322337b0a1e5e0",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/klauspost/crc32",
+			"repository": "https://github.com/klauspost/crc32",
+			"vcs": "git",
+			"revision": "cb6bfca970f6908083f26f39a79009d608efd5cd",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/nbutton23/zxcvbn-go",
+			"repository": "https://github.com/nbutton23/zxcvbn-go",
+			"vcs": "git",
+			"revision": "a22cb81b2ecdde8b68e9ffb8824731cbf88e1de4",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/robertkrimen/otto",
+			"repository": "https://github.com/robertkrimen/otto",
+			"vcs": "git",
+			"revision": "bf1c3795ba078da6905fe80bfbc3ed3d8c36e9aa",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/valyala/bytebufferpool",
+			"repository": "https://github.com/valyala/bytebufferpool",
+			"vcs": "git",
+			"revision": "e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/valyala/fasthttp",
+			"repository": "https://github.com/valyala/fasthttp",
+			"vcs": "git",
+			"revision": "cd7c1dafbc8e04e779e011bf06ee28e730780098",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/valyala/tcplisten",
+			"repository": "https://github.com/valyala/tcplisten",
+			"vcs": "git",
+			"revision": "b8336c60ea8b4f09c6b99f851661f5a2b0914f08",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/readline.v1",
+			"repository": "https://gopkg.in/readline.v1",
+			"vcs": "git",
+			"revision": "62c6fe6193755f722b8b8788aa7357be55a50ff1",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/sourcemap.v1",
+			"repository": "https://gopkg.in/sourcemap.v1",
+			"vcs": "git",
+			"revision": "eef8f47ab679652a7d3a4ee34c34314d255d2536",
+			"branch": "master",
+			"notests": true
+		}
+	]
+}
