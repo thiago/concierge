@@ -10,6 +10,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/ddliu/motto",
+			"repository": "https://github.com/ddliu/motto",
+			"vcs": "git",
+			"revision": "8933bbc2c051c5a0d2c5cac5b89ab36aa1123453",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/julienschmidt/httprouter",
 			"repository": "https://github.com/julienschmidt/httprouter",
 			"vcs": "git",
