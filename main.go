@@ -1,10 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/ddliu/motto"
 	"github.com/julienschmidt/httprouter"
@@ -54,11 +54,13 @@ func VMJavaScript(w http.ResponseWriter, r *http.Request, ps httprouter.Params, 
 	_, err := vm.Compile(src, nil)
 	if err != nil {
 		log.Println(err.Error())
+		chanDone <- err
 	}
 
 	exports, err := vm.Run(src)
 	if err != nil {
 		log.Println(err.Error())
+		chanDone <- err
 	}
 
 	var value otto.Value
@@ -68,6 +70,7 @@ func VMJavaScript(w http.ResponseWriter, r *http.Request, ps httprouter.Params, 
 		value, err = exports.Call(exports, request, response)
 		if err != nil {
 			log.Println(err.Error())
+			chanDone <- err
 		}
 
 	} else {
@@ -75,11 +78,17 @@ func VMJavaScript(w http.ResponseWriter, r *http.Request, ps httprouter.Params, 
 		fn, err := exports.Object().Get(ps.ByName("fn"))
 		if err != nil {
 			log.Println(err.Error())
+			chanDone <- err
 		}
 
-		value, err = fn.Call(fn, request, response)
-		if err != nil {
-			log.Println(err.Error())
+		if fn.IsUndefined() {
+			chanDone <- errors.New("Function not found")
+		} else {
+			value, err = fn.Call(fn, request, response)
+			if err != nil {
+				log.Println(err.Error())
+				chanDone <- err
+			}
 		}
 
 	}
@@ -88,13 +97,10 @@ func VMJavaScript(w http.ResponseWriter, r *http.Request, ps httprouter.Params, 
 
 	if value.IsString() {
 		w.Write([]byte(value.String()))
-	} else {
-		w.WriteHeader(500)
-		w.Header().Set("content-type", "application/json; charset=utf-8")
-		w.Write([]byte(`{"statusCode":500, "code": 500.1, "error": "Invalid response"}`))
+		chanDone <- nil
 	}
 
-	chanDone <- err
+	chanDone <- errors.New("Invalid response")
 
 }
 
@@ -105,16 +111,11 @@ func Execute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	go VMJavaScript(w, r, ps, done)
 
 	select {
-	case <-time.After(3 * time.Second):
-		w.WriteHeader(500)
-		w.Header().Set("content-type", "application/json; charset=utf-8")
-		w.Write([]byte(`{"statusCode":500, "code": 500.2, "error": "Timout in process"}`))
-
 	case err := <-done:
 		if err != nil {
 			w.WriteHeader(500)
 			w.Header().Set("content-type", "application/json; charset=utf-8")
-			w.Write([]byte(`{"statusCode":500, "code": 500.3, "error": ` + err.Error() + `}`))
+			w.Write([]byte(`{"statusCode":500, "code": 500.1, "error": "` + err.Error() + `"}`))
 		}
 	}
 
