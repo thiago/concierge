@@ -1,124 +1,56 @@
 package main
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
+	"time"
 
-	"github.com/ddliu/motto"
 	"github.com/julienschmidt/httprouter"
-	"github.com/robertkrimen/otto"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
 
-type Request map[string]interface{}
-type Response interface{}
-
-func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(415)
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	w.Write([]byte(`{"statusCode":415, "code": 415.1, "error": "Resource not work with method"}`))
-}
-
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(404)
-	w.Header().Set("content-type", "application/json; charset=utf-8")
-	w.Write([]byte(`{"statusCode":404, "code": 404.1, "error": "Resource not found"}`))
-}
-
-func VMJavaScript(w http.ResponseWriter, r *http.Request, ps httprouter.Params, chanDone chan<- error) {
-
-	vm := motto.New()
-
-	concierge := map[string]string{
-		"JSON":  "application/json; charset=utf-8",
-		"PLAIN": "text/plain; charset=utf-8",
-	}
-
-	request := make(map[string]interface{}, 2)
-	request["URL"] = r.URL.String()
-	request["params"] = ps.ByName
-
-	response := func(statusCode int, contentType string, body interface{}) interface{} {
-		w.WriteHeader(statusCode)
-		w.Header().Set("content-type", contentType)
-		return body
-	}
-
-	vm.Set("concierge", concierge)
-
-	src := fmt.Sprintf("./%s.js", ps.ByName("file"))
-
-	_, err := vm.Compile(src, nil)
-	if err != nil {
-		log.Println(err.Error())
-		chanDone <- err
-	}
-
-	exports, err := vm.Run(src)
-	if err != nil {
-		log.Println(err.Error())
-		chanDone <- err
-	}
-
-	var value otto.Value
-
-	if exports.IsFunction() {
-
-		value, err = exports.Call(exports, request, response)
-		if err != nil {
-			log.Println(err.Error())
-			chanDone <- err
-		}
-
-	} else {
-
-		fn, err := exports.Object().Get(ps.ByName("fn"))
-		if err != nil {
-			log.Println(err.Error())
-			chanDone <- err
-		}
-
-		if fn.IsUndefined() {
-			chanDone <- errors.New("Function not found")
-		} else {
-			value, err = fn.Call(fn, request, response)
-			if err != nil {
-				log.Println(err.Error())
-				chanDone <- err
-			}
-		}
-
-	}
-
-	fmt.Println(value)
-
-	if value.IsString() {
-		w.Write([]byte(value.String()))
-		chanDone <- nil
-	}
-
-	chanDone <- errors.New("Invalid response")
-
-}
-
 func Execute(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	errch := make(chan error, 1)
+	cmd := exec.Command("node", "./wrapper.js")
 
-	done := make(chan error)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	go VMJavaScript(w, r, ps, done)
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		errch <- cmd.Wait()
+	}()
+
+	go func() {
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			line := scanner.Text()
+			w.Write([]byte(line))
+		}
+	}()
 
 	select {
-	case err := <-done:
+	case <-time.After(time.Millisecond * 80):
+		err := cmd.Process.Kill()
 		if err != nil {
-			w.WriteHeader(500)
-			w.Header().Set("content-type", "application/json; charset=utf-8")
-			w.Write([]byte(`{"statusCode":500, "code": 500.1, "error": "` + err.Error() + `"}`))
+			fmt.Println(err.Error())
+		}
+		log.Println("Timeout hit..")
+		return
+	case err := <-errch:
+		if err != nil {
+			log.Println("traceroute failed:", err)
 		}
 	}
-
 }
 
 func main() {
@@ -129,10 +61,7 @@ func main() {
 
 	router := httprouter.New()
 
-	router.NotFound = http.HandlerFunc(NotFound)
-	router.MethodNotAllowed = http.HandlerFunc(MethodNotAllowed)
-
-	router.GET("/:file/:fn/:name", Execute)
+	router.GET("/:name", Execute)
 
 	handler := fasthttpadaptor.NewFastHTTPHandler(router)
 
